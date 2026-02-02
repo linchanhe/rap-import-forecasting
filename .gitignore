@@ -205,3 +205,12 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Custom rules
+__pycache__/
+*.pyc
+.venv/
+.ipynb_checkpoints/
+outputs/*
+!.gitkeep
+.DS_Store

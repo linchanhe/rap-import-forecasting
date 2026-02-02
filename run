@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "Entering Nix shell"
+
+nix-shell --quiet --run '
+  set -euo pipefail
+
+  echo "Running tests..."
+  python -m pytest
+
+  echo "Starting pipeline..."
+  python -m src.pipeline
+
+  echo "Done. Check outputs/ for results."
+'
