@@ -7,7 +7,7 @@ A fully reproducible analytical pipeline for forecasting Eurozone imports using 
 ![tests](https://img.shields.io/badge/tests-pytest-informational)
 
 A **reproducible analytical pipeline** for **1-step-ahead forecasting** of the target series
-`import_clv_qna_sa`, benchmarking:
+`import_clv_qna_sa` (macroeconomic indicator), benchmarking:
 
 - **ARIMA** (univariate baseline)
 - **VAR** (multivariate baseline)
@@ -22,6 +22,9 @@ The repository is designed so an instructor can **run everything with one comman
 You only need **Nix** installed.
 
 1. **Clone the repository:**
+   ```bash
+   git clone [https://github.com/](https://github.com/)<linchanhe>/rap-import-forecasting.git
+   cd rap-import-forecasting
 2. From the repository root:
 
 ```bash
