@@ -23,7 +23,7 @@ You only need **Nix** installed.
 
 1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/](https://github.com/)<linchanhe>/rap-import-forecasting.git
+   git clone https://github.com/linchanhe/rap-import-forecasting.git
    cd rap-import-forecasting
 2. From the repository root:
 
