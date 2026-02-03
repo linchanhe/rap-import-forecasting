@@ -13,8 +13,7 @@
 #  > "statsmodels",
 #  > "openpyxl",
 #  > "pytest",
-#  > "jinja2",
-#  > "weasyprint")),
+#  > "jinja2")),
 #  > ide = "none",
 #  > project_path = ".",
 #  > overwrite = TRUE,
@@ -26,12 +25,6 @@
 let
  pkgs = import (fetchTarball "https://github.com/rstats-on-nix/nixpkgs/archive/2026-01-05.tar.gz") {};
    
-  tex = (pkgs.texlive.combine {
-    inherit (pkgs.texlive) 
-      scheme-small
-      amsmath;
-  });
- 
   pyconf = builtins.attrValues {
     inherit (pkgs.python312Packages) 
       pip
@@ -44,8 +37,7 @@ let
       pytest
       scikit-learn
       seaborn
-      statsmodels
-      weasyprint;
+      statsmodels;
   };
    
   system_packages = builtins.attrValues {
@@ -69,11 +61,11 @@ let
     LC_MEASUREMENT = "en_US.UTF-8";
     RETICULATE_PYTHON = "${pkgs.python312}/bin/python";
 
-    buildInputs = [ tex pyconf system_packages ];
-
+    #buildInputs = [ tex pyconf system_packages ];
+    buildInputs = pyconf ++ system_packages;
+    
     # 3. shellHook
     shellHook = ''
-      export FONTCONFIG_FILE=${pkgs.makeFontsConf { fontDirectories = [ pkgs.dejavu_fonts ]; }}
       export PYTHONUNBUFFERED=1
       echo "Nix shell ready."
     '';

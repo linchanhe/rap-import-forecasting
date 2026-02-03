@@ -55,7 +55,6 @@ After the pipeline finishes, you will get:
 * `outputs/rmse.csv` — RMSE scoreboard (ARIMA / VAR / NN)
 * `outputs/forecast_comparison.png` — forecast comparison plot
 * `outputs/report.html` — HTML report
-* `outputs/report.pdf` — PDF report
 
 ---
 

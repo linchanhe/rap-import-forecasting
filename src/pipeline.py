@@ -19,11 +19,11 @@ from .models.var import select_var_lag, forecast_var_recursive
 
 from sklearn.exceptions import ConvergenceWarning
 from statsmodels.tools.sm_exceptions import ValueWarning
+
 warnings.filterwarnings("ignore", category=ConvergenceWarning)
 warnings.filterwarnings("ignore", category=ValueWarning)
-warnings.filterwarnings("ignore", category=UserWarning)
-warnings.filterwarnings("ignore", category=FutureWarning)
-warnings.filterwarnings("ignore", category=DeprecationWarning)
+warnings.filterwarnings("ignore", message=r".*instantiateVariableFont.*deprecated.*", category=UserWarning)
+
 
 def ensure_outputs_dir() -> Path:
     CFG.outputs_dir.mkdir(parents=True, exist_ok=True)
@@ -117,27 +117,7 @@ def run_all() -> dict:
         outpath=plot_path
     )
 
-    # ---------- 6) Write Metadata & Generate Report ----------
-    # --- Report generation ---
-    # Option A: if you already generated html_path/pdf_path earlier, keep them
-    # Option B: if you generate report from outputs, capture returned paths
-
-    report_html_path = outdir / "report.html"
-    report_pdf_path = outdir / "report.pdf"
-
-    # If your code calls something like build_report_from_outputs(outdir),
-    # make sure it returns the actual paths. Example:
-    try:
-        print("Generating report from outputs...")
-        from .report import build_report_from_outputs
-        html_p, pdf_p = build_report_from_outputs(outdir)
-        report_html_path = html_p
-        report_pdf_path = pdf_p if pdf_p is not None else report_pdf_path
-    except Exception:
-        # fallback: assume pipeline already wrote report.html / report.pdf
-        pass
-
-    # --- Write metadata.json and return meta ---
+    # ---------- 6) Write metadata.json ----------
     meta_out = {
         "data_path": str(CFG.data_path),
         "n_total": split["n_total"],
@@ -145,31 +125,45 @@ def run_all() -> dict:
         "cutoff_date": str(cutoff_date.date()),
         "test_start": str(test_start.date()),
         "test_end": str(test_end.date()),
+        "target_col": CFG.target_col,
+        "x_col": CFG.x_col,
+        "analysis_end": str(CFG.analysis_end.date()),
+        "lags": CFG.lags,
         "nn_best_params": best_params,
         "arima_best_order": list(best_order),
         "var_selected_lag": selected_lag,
         "outputs": {
-            "rmse_csv": str(rmse_path),
-            "plot_png": str(plot_path),
-            "report_html": str(report_html_path),
-            "report_pdf": str(report_pdf_path) if report_pdf_path.exists() else None,
-        }
+            "rmse_csv": "outputs/rmse.csv",
+            "forecast_csv": "outputs/forecasts.csv",
+            "plot_png": "outputs/forecast_comparison.png",
+            "report_html": "outputs/report.html",  # expected output
+        },
     }
-    
+
     (outdir / "metadata.json").write_text(json.dumps(meta_out, indent=2), encoding="utf-8")
 
-    # ---- Standard output summary ----
+    # ---------- 7) Generate report ----------
+    print("Generating report from outputs...")
+    html_p, _ = build_report_from_outputs(outdir)
+    report_html_path = Path(html_p)
+
+    # If something went wrong, be explicit
+    if not report_html_path.exists():
+        print("[report] report.html was not generated (unexpected).")
+        meta_out["outputs"]["report_html"] = None
+
+    # ---------- 8) Standard output summary ----------
     print("Outputs written to: outputs/")
     print("- rmse.csv")
+    print("- forecasts.csv")
     print("- forecast_comparison.png")
-    print("- report.html")
-    if meta_out["outputs"]["report_pdf"] is not None:
-        print("- report.pdf")
+    if meta_out["outputs"]["report_html"] is not None:
+        print("- report.html")
     else:
-        print("- report.pdf (not generated)")
-
+        print("- report.html (not generated)")
 
     return meta_out
+
 
 if __name__ == "__main__":
     meta = run_all()

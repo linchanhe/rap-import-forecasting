@@ -109,18 +109,14 @@ def write_html_report(
     )
     out_html.write_text(html, encoding="utf-8")
 
-def try_write_pdf_from_html(html_path: Path, pdf_path: Path) -> bool:
-    try:
-        from weasyprint import HTML
-        HTML(filename=str(html_path)).write_pdf(str(pdf_path))
-        return True
-    except Exception:
-        return False
 
-def build_report_from_outputs(outputs_dir: Path) -> tuple[Path, Path | None]:
+def build_report_from_outputs(outputs_dir: Path) -> tuple[Path, None]:
     """
-    Convenience: read outputs (metadata.json, rmse.csv, plot) and generate report.html (+ report.pdf if possible)
+    Read outputs (metadata.json, rmse.csv, plot) and generate report.html.
+    PDF generation is intentionally disabled (HTML only).
     """
+    outputs_dir = Path(outputs_dir)
+
     meta_path = outputs_dir / "metadata.json"
     rmse_path = outputs_dir / "rmse.csv"
     plot_path = outputs_dir / "forecast_comparison.png"
@@ -128,12 +124,11 @@ def build_report_from_outputs(outputs_dir: Path) -> tuple[Path, Path | None]:
     meta = json.loads(meta_path.read_text(encoding="utf-8"))
     rmse_df = pd.read_csv(rmse_path)
 
-    # flatten some fields for template
     tpl_meta = {
-        "target_col": meta.get("outputs_meta", {}).get("target_col", meta.get("target_col", "import_clv_qna_sa")),
-        "x_col": meta.get("outputs_meta", {}).get("x_col", meta.get("x_col", "import_s_clv_qna_sa")),
-        "analysis_end": meta.get("analysis_end", meta.get("outputs_meta", {}).get("analysis_end", "")),
-        "lags": meta.get("lags", meta.get("outputs_meta", {}).get("lags", "")),
+        "target_col": meta.get("target_col", "import_clv_qna_sa"),
+        "x_col": meta.get("x_col", "import_s_clv_qna_sa"),
+        "analysis_end": meta.get("analysis_end", ""),
+        "lags": meta.get("lags", ""),
         "n_train": meta.get("n_train", ""),
         "cutoff_date": meta.get("cutoff_date", ""),
         "test_start": meta.get("test_start", ""),
@@ -147,6 +142,5 @@ def build_report_from_outputs(outputs_dir: Path) -> tuple[Path, Path | None]:
     out_html = outputs_dir / "report.html"
     write_html_report(out_html, rmse_df, plot_path.name, tpl_meta)
 
-    out_pdf = outputs_dir / "report.pdf"
-    pdf_ok = try_write_pdf_from_html(out_html, out_pdf)
-    return out_html, (out_pdf if pdf_ok else None)
+    return out_html, None
+
